@@ -1,6 +1,6 @@
 const chai = require('chai');
 const assert = chai.assert;
-//series of tests to check if the function is working properly
+
 const server = require('../server');
 
 const chaiHttp = require('chai-http');
@@ -13,12 +13,12 @@ suite('Functional Tests', function () {
     // #1
     test('Test GET /hello with no name', function (done) {
       chai
-        .request(server)//request to the server
-        .get('/hello')//get request to the /hello route (endpoint)
-        .end(function (err, res) {//callback function
-          assert.equal(res.status, 200,'Response status should be 200');//check if the status is 200
-          assert.equal(res.text, 'hello Guest', 'Response should be "hello Guest"');//check if the response is "hello Guest"
-          done();//call done() to complete the test
+        .request(server)
+        .get('/hello')
+        .end(function (err, res) {
+          assert.equal(res.status, 200,'Response status should be 200');
+          assert.equal(res.text, 'hello Guest', 'Response should be "hello Guest"');
+          done();
         });
     });
     // #2
@@ -45,14 +45,23 @@ suite('Functional Tests', function () {
           assert.equal(res.body.surname, 'Colombo');
           
 
+
           done();
         });
     });
     // #4
     test('Send {surname: "da Verrazzano"}', function (done) {
-      assert.fail();
-
-      done();
+      chai
+        .request(server)
+        .put('/travellers')
+        .send({surname: 'da Verrazzano'})
+        .end(function (err, res) {
+          assert.equal(res.status, 200);
+          assert.equal(res.type, 'application/json');
+          assert.equal(res.body.name, 'Giovanni');
+          assert.equal(res.body.surname, 'da Verrazzano');
+          done();
+        });
     });
   });
 });
