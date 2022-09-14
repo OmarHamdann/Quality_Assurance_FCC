@@ -66,35 +66,48 @@ suite('Functional Tests', function () {
   });
 });
 
+//zombie 
+
 const Browser = require('zombie');
-const browser = new Browser();
+
+Browser.site = 'https://boilerplate-mochachai.omarhamdann.repl.co';
+
 suite('Functional Tests with Zombie.js', function () {
   this.timeout(5000);
 
-
+  const browser = new Browser();
+  suiteSetup(function(done) {
+    return browser.visit('/', done);
+  });
 
   suite('Headless browser', function () {
     test('should have a working "site" property', function() {
-      browser.site = 'https://boilerplate-mochachai.omarhamdann.repl.co';
       assert.isNotNull(browser.site);
-      suiteSetup(function(done) {
-        return browser.visit('/', done);
-      });
     });
   });
 
   suite('"Famous Italian Explorers" form', function () {
     // #5
     test('Submit the surname "Colombo" in the HTML form', function (done) {
-      assert.fail();
-
-      done();
+      browser.fill('surname', 'Colombo');
+      browser.pressButton('submit', () => {
+        browser.assert.success();
+        browser.assert.text('span#name', 'Cristoforo');
+        browser.assert.text('span#surname', 'Colombo');
+        browser.assert.elements('span#dates', 1);
+        done();
+      });
     });
     // #6
     test('Submit the surname "Vespucci" in the HTML form', function (done) {
-      assert.fail();
-
-      done();
+      browser.fill('surname', 'Vespucci');
+      browser.pressButton('submit', () => {
+        browser.assert.success();
+        browser.assert.text('span#name', 'Amerigo');
+        browser.assert.text('span#surname', 'Vespucci');
+        browser.assert.elements('span#dates', 1);
+        done();
+      });
     });
   });
 });
