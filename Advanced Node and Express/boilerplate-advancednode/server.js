@@ -20,7 +20,7 @@ app.set('views','./views/pug');
 
 app.route('/').get((req, res) => {
   // Change the response to render the Pug template
-  res.render('index');
+  res.render('index', {title: 'Hello', message: 'Please login'});
 });
 
 const PORT = process.env.PORT || 3000;
