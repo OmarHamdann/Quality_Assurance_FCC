@@ -71,7 +71,7 @@ myDB(async (client) => {
   });
 });
 
-console.log(passport)
+
 
 app.post('/login',
  bodyParser.urlencoded({ extended: false }),
@@ -81,7 +81,7 @@ app.post('/login',
 });
 
 // Be sure to add this... (middleware) to make sure the user is authenticated when calling the /profile route 
-const isSignedIn = (req, res, next) => {
+const ensureAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next();
   }
@@ -89,8 +89,8 @@ const isSignedIn = (req, res, next) => {
 };
 
 
-app.get('/profile', isSignedIn , (req, res) => {
-  res.render('profile', { username: req.user.name });
+app.get('/profile', ensureAuthenticated , (req, res) => {
+  res.render(process.cwd() + '/views/pug/profile', { username: req.user.username });
 });
 
 
