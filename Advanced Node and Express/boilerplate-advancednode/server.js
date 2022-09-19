@@ -41,6 +41,23 @@ myDB(async (client) => {
     });
   });
 
+
+  //logout user and redirect to home page
+app.route('/logout')
+.get((req, res) => {
+  req.logout();
+  res.redirect('/');
+});
+
+
+// page not found 
+app.use((req, res, next) => {
+res.status(404)
+  .type('text')
+  .send('Not Found');
+});
+
+
   // Serialization and deserialization here...
   passport.serializeUser((user, done) => {
     done(null, user._id);
@@ -92,6 +109,8 @@ const ensureAuthenticated = (req, res, next) => {
 app.get('/profile', ensureAuthenticated , (req, res) => {
   res.render(process.cwd() + '/views/pug/profile', { username: req.user.username });
 });
+
+
 
 
 
