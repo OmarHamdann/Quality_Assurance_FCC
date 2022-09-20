@@ -11,7 +11,7 @@ const bodyParser = require('body-parser');
 
 const app = express();
 app.set('view engine', 'pug');
-app.set('views','./views/pug');
+app.set('views', './views/pug');
 
 fccTesting(app); // For fCC testing purposes
 app.use('/public', express.static(process.cwd() + '/public'));
@@ -37,26 +37,73 @@ myDB(async (client) => {
     res.render('index', {
       title: 'Connected to Database',
       message: 'Please login',
-      showLogin: true
+      showLogin: true,
+      showRegistration: true
     });
   });
 
 
   //logout user and redirect to home page
-app.route('/logout')
-.get((req, res) => {
-  req.logout();
-  res.redirect('/');
-});
+  app.route('/logout')
+    .get((req, res) => {
+      req.logout();
+      res.redirect('/');
+    });
+
+  //registration new user and redirect to profile page
+  app.post('/register', (req, res, next) => {
+    myDataBase.findOne({ username: req.body.username }, function (err, user) {
+      if (err) {
+        next(err);
+      } else if (user) {
+        res.redirect('/');
+      } else {
+        myDataBase.insertOne({
+          username: req.body.username,
+          password: req.body.password,
+          name: req.body.name
+        },
+          (err, doc) => {
+            if (err) {
+              res.redirect('/');
+            } else {
+              // The inserted document is held within
+              // the ops property of the doc
+              next(null, doc.ops[0]);
+            }
+          }
+        )
+      }
+    })
+  },
+    //after registration new user, login user and redirect to profile page 
+    passport.authenticate('local', { failureRedirect: '/' }),
+    (req, res, next) => {
+      res.redirect('/profile');
+    });
 
 
-// page not found 
-app.use((req, res, next) => {
-res.status(404)
-  .type('text')
-  .send('Not Found');
-});
+  app.post('/login',
+    bodyParser.urlencoded({ extended: false }),
+    passport.authenticate('local', { failureRedirect: '/' }),
+    (req, res) => {
+      res.redirect('/profile');
+    });
 
+  app.get('/profile', ensureAuthenticated, (req, res) => {
+    res.render(process.cwd() + '/views/pug/profile', { name: req.user.name });
+  });
+
+
+   // page not found 
+   app.use("*", (req, res, next) => {
+    res.status(404)
+      .type('text')
+      .send('Not Found');
+  });
+
+
+  
 
   // Serialization and deserialization here...
   passport.serializeUser((user, done) => {
@@ -79,7 +126,7 @@ res.status(404)
   });
 
   passport.use(findUserDocumnet);
-   
+
 
   // Be sure to add this...
 }).catch((e) => {
@@ -90,12 +137,6 @@ res.status(404)
 
 
 
-app.post('/login',
- bodyParser.urlencoded({ extended: false }),
- passport.authenticate('local', { failureRedirect: '/' }), 
- (req, res) => {
-  res.redirect('/profile');
-});
 
 // Be sure to add this... (middleware) to make sure the user is authenticated when calling the /profile route 
 const ensureAuthenticated = (req, res, next) => {
@@ -104,15 +145,6 @@ const ensureAuthenticated = (req, res, next) => {
   }
   res.redirect('/');
 };
-
-
-app.get('/profile', ensureAuthenticated , (req, res) => {
-  res.render(process.cwd() + '/views/pug/profile', { username: req.user.username });
-});
-
-
-
-
 
 // app.listen out here...
 
