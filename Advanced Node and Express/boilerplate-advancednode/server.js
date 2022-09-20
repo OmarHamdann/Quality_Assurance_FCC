@@ -28,59 +28,22 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.route('/').get((req, res) => {
+  // Change the response to render the Pug template
+  res.render('index', {
+    title: 'Connected to Database',
+    message: 'Please login',
+    showLogin: true,
+    showRegistration: true
+  });
+
+
+});
 myDB(async (client) => {
   const myDataBase = await client.db('database').collection('users');
 
   // Be sure to change the title
-  app.route('/').get((req, res) => {
-    // Change the response to render the Pug template
-    res.render('index', {
-      title: 'Connected to Database',
-      message: 'Please login',
-      showLogin: true,
-      showRegistration: true
-    });
-  });
 
-
-  //logout user and redirect to home page
-  app.route('/logout')
-    .get((req, res) => {
-      req.logout();
-      res.redirect('/');
-    });
-
-  //registration new user and redirect to profile page
-  app.post('/register', (req, res, next) => {
-    myDataBase.findOne({ username: req.body.username }, function (err, user) {
-      if (err) {
-        next(err);
-      } else if (user) {
-        res.redirect('/');
-      } else {
-        myDataBase.insertOne({
-          username: req.body.username,
-          password: req.body.password,
-          name: req.body.name
-        },
-          (err, doc) => {
-            if (err) {
-              res.redirect('/');
-            } else {
-              // The inserted document is held within
-              // the ops property of the doc
-              next(null, doc.ops[0]);
-            }
-          }
-        )
-      }
-    })
-  },
-    //after registration new user, login user and redirect to profile page 
-    passport.authenticate('local', { failureRedirect: '/' }),
-    (req, res, next) => {
-      res.redirect('/profile');
-    });
 
 
   app.post('/login',
@@ -94,16 +57,50 @@ myDB(async (client) => {
     res.render(process.cwd() + '/views/pug/profile', { name: req.user.name });
   });
 
+  //logout user and redirect to home page
+  app.route('/logout')
+    .get((req, res) => {
+      req.logout();
+      res.redirect('/');
+    });
 
-   // page not found 
-   app.use("*", (req, res, next) => {
+  //registration new user and redirect to profile page
+app.route('/register').post(
+    (req, res, next) => {
+        myDataBase.findOne({
+            username: req.body.username
+        }, function(err, user) {
+            if (err) {
+                next(err);
+            } else if (user) {
+                res.redirect('/');
+            } else {
+                myDataBase.insertOne({
+                    username: req.body.username,
+                    password: req.body.password,
+                    name:  req.body.name
+                }, (err, doc) => {
+                    if (err) {
+                        res.redirect('/');
+                    } else {
+                        next(null, doc.ops[0]);
+                    }
+                });
+            }
+        });
+    },
+    passport.authenticate('local', {
+        failureRedirect: '/'
+    }), (req, res, next) => {
+        res.redirect('/profile');
+    }
+);
+  // page not found 
+  app.use("*", (req, res, next) => {
     res.status(404)
       .type('text')
       .send('Not Found');
   });
-
-
-  
 
   // Serialization and deserialization here...
   passport.serializeUser((user, done) => {
