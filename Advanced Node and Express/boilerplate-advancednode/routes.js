@@ -10,7 +10,8 @@ module.exports = function (app, myDataBase) {
     res.redirect('/profile');
   });
   app.route('/profile').get(ensureAuthenticated, (req, res) => {
-    res.render('pug/profile', { username: req.user.name });
+    console.log(req.user.name)
+    res.render('pug/profile', { name: req.user.name });
   });
   app.route('/logout').get((req, res) => {
     req.logout();
@@ -25,7 +26,7 @@ module.exports = function (app, myDataBase) {
         } else if (user) {
           res.redirect('/');
         } else {
-          myDataBase.insertOne({ username: req.body.username, password: hash }, (err, doc) => {
+          myDataBase.insertOne({ username: req.body.username, password: hash ,name:req.body.name}, (err, doc) => {
             if (err) {
               res.redirect('/');
             } else {
