@@ -54,7 +54,7 @@ function ConvertHandler() {
   this.getReturnUnit = function(initUnit) {
     let result;
     let unitMap = {
-      gal: 'l',
+      gal: 'L',
       l: 'gal',
       mi: 'km',
       km: 'mi',
