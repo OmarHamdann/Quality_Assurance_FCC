@@ -160,8 +160,7 @@ module.exports = function (app) {
       });
     })
     .put((req, res) => {
-      //       thread_id: 60898569e083081d56e290cf
-      //       reply_id: 608986aee083081d56e290d0
+
       const { thread_id, reply_id } = req.body;
       const board = req.params.board;
       BoardModel.findOne({ name: board }, (err, data) => {
