@@ -7,7 +7,8 @@ const cors = require("cors");
 const apiRoutes = require("./routes/api.js");
 const fccTestingRoutes = require("./routes/fcctesting.js");
 const runner = require("./test-runner");
-require("./db-connection.js");
+const helmet = require("helmet");
+require("./db-connection");
 
 const app = express();
 
@@ -17,6 +18,14 @@ app.use(cors({ origin: "*" })); //For FCC testing purposes only
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(helmet.frameguard());
+app.use(
+  helmet({
+    referrerPolicy: { policy: "same-origin" },
+  })
+);
+app.use(helmet.dnsPrefetchControl());
 
 //Sample front-end
 app.route("/b/:board/").get(function (req, res) {
