@@ -56,21 +56,28 @@ exports.findReply = async (thread_id) =>
 
 exports.deleteReply = async (thread_id, reply_id, delete_password) =>
 {
-    const deleteReply = await Message.findOneAndUpdate(
-        {
-            _id: ObjectId(thread_id),
-            'replies._id': ObjectId(reply_id),
-            'replies.delete_password': delete_password
-        },
-        {
-            $set:
-            {
-                "replies.$.text": '[deleted]'
-            }
-        }
-    ).lean();
 
-    return deleteReply ? "success" : "incorrect password";
+    Message.findById(
+      thread_id,
+      (err, threadToDelete) => {
+        let replay=threadToDelete.replies.find(reply => reply.delete_password == delete_password);
+        console.log(replay);
+        console.log(thread_id);
+        console.log(reply_id);
+
+        if (err || !threadToDelete)
+          return 'thread not found'
+
+        if (replay.delete_password != delete_password)
+          return 'incorrect password'
+        
+        threadToDelete.findByIdAndRemove(reply_id, (err, success) => {
+        if (!err && success)
+        return 'success'
+        })
+      }
+    )
+
 }
 
 exports.reportReply = async (thread_id, reply_id) =>

@@ -39,6 +39,7 @@ exports.deleteReply = async (req, res) => {
     const { thread_id, reply_id, delete_password } = req.body;
     
     const result = await replyRepository.deleteReply(thread_id, reply_id, delete_password);
+    console.log(result);
     
     return res.send(result);
   }
